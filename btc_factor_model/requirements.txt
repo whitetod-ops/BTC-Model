@@ -1,0 +1,16 @@
+# Core modeling stack (versions verified against the build environment)
+numpy>=1.26
+pandas>=2.0
+scipy>=1.11
+scikit-learn>=1.7
+xgboost>=2.0
+statsmodels>=0.14
+plotly>=5.20
+
+# Data feeds (see SETUP_DATA_FEEDS.md)
+fredapi>=0.5          # FRED macro (needs FRED_API_KEY)
+yfinance>=0.2.40      # BTC price + FX/equities
+coinmetrics-api-client>=2024.1   # on-chain (community tier, no key)
+requests>=2.31        # Deribit / alternative.me / DefiLlama / scrapers
+lxml>=5.0             # pandas.read_html for the Farside scraper
+python-dotenv>=1.0    # load API keys from .env

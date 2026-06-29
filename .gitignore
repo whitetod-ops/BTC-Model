@@ -1,0 +1,15 @@
+# environment / secrets / caches (NEVER commit)
+.venv/
+.env
+.env.txt
+.env.local
+*.env
+**/.env
+**/.env.txt
+__pycache__/
+*.pyc
+*.pyo
+artifacts/cache/
+
+# .env.example (template, no real key) IS committed on purpose.
+# artifacts/*.html and *.csv are committed so the daily job publishes them.

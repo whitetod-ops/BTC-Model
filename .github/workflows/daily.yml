@@ -1,0 +1,31 @@
+name: daily-btc-model
+on:
+  schedule:
+    # 00:00 America/Chicago. CDT (summer) = 05:00 UTC; use "0 6 * * *" for CST.
+    - cron: "0 5 * * *"
+  workflow_dispatch: {}          # lets you run it manually from the Actions tab
+
+permissions:
+  contents: write                # allow the job to commit results back
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install deps
+        run: pip install -r btc_factor_model/requirements.txt lxml html5lib
+      - name: Run model
+        env:
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+        run: python -m btc_factor_model.daily_run --source real
+      - name: Commit artifacts
+        run: |
+          git config user.name "btc-model-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add artifacts/*.html artifacts/*.csv
+          git commit -m "daily run $(date -u +%F)" || echo "no changes to commit"
+          git push
