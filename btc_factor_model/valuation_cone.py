@@ -72,10 +72,15 @@ class ConeResult:
 
 class ValuationCone:
     def __init__(self, channel_q=(0.05, 0.95), band_q=(0.10, 0.90),
-                 reversion_tau_days: float = 730.0):
+                 reversion_tau_days: float = 730.0, channel_window: int = 1095):
         self.channel_q = channel_q     # structural channel walls (deviation pctiles)
         self.band_q = band_q           # probabilistic return cone
         self.reversion_tau = reversion_tau_days   # mean-reversion speed to trend
+        # Trailing window (days) for the deviation quantiles. Full-history
+        # quantiles over-cover (~96%) because the wild 2010-13 deviations widen
+        # the walls forever; a ~3yr trailing window tracks the CURRENT regime so
+        # the band is a true ~90% channel and "cheap/rich" is meaningful.
+        self.channel_window = channel_window
         self._fwd_scale = 1.0          # forward power-law rescaled to blended today
         self._network = None           # active addresses (enables Metcalfe blend)
         self._metcalfe_slope = 2.0     # classic Metcalfe exponent (fixed, stable)
@@ -131,8 +136,9 @@ class ValuationCone:
 
     def channel_at(self, dates):
         fair = self.fair_at(dates)
-        lo = np.quantile(self.dev_, self.channel_q[0])
-        hi = np.quantile(self.dev_, self.channel_q[1])
+        rec = self.dev_[-self.channel_window:]            # current-regime dispersion
+        lo = np.quantile(rec, self.channel_q[0])
+        hi = np.quantile(rec, self.channel_q[1])
         return fair * 10 ** lo, fair, fair * 10 ** hi
 
     def _ret_quantile(self, h: int, q: float) -> float:
@@ -159,8 +165,8 @@ class ValuationCone:
         a = (sy - b * sx) / cnt
         fair_c = 10 ** (a + b * x)
         dev_c = y - np.log10(fair_c)
-        lo = dev_c.expanding(min_periods).quantile(self.channel_q[0])
-        hi = dev_c.expanding(min_periods).quantile(self.channel_q[1])
+        lo = dev_c.rolling(self.channel_window, min_periods=min_periods).quantile(self.channel_q[0])
+        hi = dev_c.rolling(self.channel_window, min_periods=min_periods).quantile(self.channel_q[1])
         return pd.DataFrame({"fair_causal": fair_c.values,
                              "support_causal": (fair_c * 10 ** lo).values,
                              "resistance_causal": (fair_c * 10 ** hi).values},
