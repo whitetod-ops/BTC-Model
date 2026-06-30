@@ -212,9 +212,8 @@ def add_original_factors(panel: pd.DataFrame) -> pd.DataFrame:
         out["mom_30d"] = lp - lp.shift(21)     # ~1-month trend
         out["mom_90d"] = lp - lp.shift(63)     # ~3-month trend
         out["mom_180d"] = lp - lp.shift(126)   # ~6-month trend
-        # Mayer multiple (price / 200d SMA): compute if not already supplied.
-        if "mayer_multiple" not in out.columns or out["mayer_multiple"].isna().all():
-            out["mayer_multiple"] = p / p.rolling(200, min_periods=50).mean()
+        # (Mayer multiple removed: it is a trend gauge mislabeled as valuation and
+        #  redundant with mom_180d -- see backtest.py --factors.)
     # Funding-stress factor needs USD/JPY.
     if "usdjpy" in out.columns:
         out["funding_stress_factor"] = funding_stress_factor(out)

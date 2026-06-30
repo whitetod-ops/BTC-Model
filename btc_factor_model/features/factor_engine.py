@@ -58,7 +58,7 @@ from ..factors.transforms import apply_transform
 # Slow structural factors: normalize with an EXPANDING window so they stay
 # mean-reverting (like the cone) instead of being turned into momentum by a
 # 1-year rolling z-score.
-SLOW_EXPANDING = {"power_law_dev", "mayer_multiple", "mvrv_z", "nupl"}
+SLOW_EXPANDING = {"power_law_dev", "mvrv_z", "nupl"}
 
 _STANDALONE_BULLISH = {
     "effective_float": -1,             # rising tradable float = more sellable supply
